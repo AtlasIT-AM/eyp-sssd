@@ -1,0 +1,26 @@
+#
+# puppet managed file
+#
+
+[logging]
+ default = FILE:/var/log/krb5libs.log
+ kdc = FILE:/var/log/krb5kdc.log
+ admin_server = FILE:/var/log/kadmind.log
+
+[libdefaults]
+ default_realm = <%= @realm %>
+ dns_lookup_realm = <%= @dns_lookup_realm %>
+ dns_lookup_kdc = <%= @dns_lookup_kdc %>
+ ticket_lifetime = 24h
+ renew_lifetime = 7d
+ forwardable = true
+
+[realms]
+ <%= @realm %> = {
+  kdc = kerberos.example.com
+  admin_server = kerberos.example.com
+ }
+
+[domain_realm]
+ .example.com = <%= @realm %>
+ example.com = <%= @realm %>
