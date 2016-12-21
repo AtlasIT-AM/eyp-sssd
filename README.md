@@ -1,4 +1,4 @@
-# sssd ![status ready](https://img.shields.io/badge/status-ready-brightgreen.svg) ![doc missing](https://img.shields.io/badge/doc-missing-red.svg)
+# sssd ![status ready](https://img.shields.io/badge/status-ready-brightgreen.svg) ![doc missing](https://img.shields.io/badge/doc-partial-yellow.svg)
 
 [![PRs Welcome](https://img.shields.io/badge/prs-welcome-brightgreen.svg)]
 
@@ -13,26 +13,29 @@
 4. [Usage](#usage)
 5. [Reference](#reference)
 5. [Limitations](#limitations)
+6. [Development](#development)
 
 ## Overview
 
-Setups LDAP authentication using sssd
-
-This documentation has reviewed up to version 0.1.50.
+Setups AD/LDAP authentication using **sssd**
 
 ## Module Description
 
-Setups LDAP authentication, and optionally ssh keys on LDAP and sudo on LDAP
+Setups AD/LDAP authentication, and optionally ssh keys and sudo on LDAP
 
 ## Setup
 
 ### What sssd affects
 
-* Manages /etc/nsswitch.conf using **eyp/nsswitch**
+* Uses **eyp/nsswitch** to manage /etc/nsswitch.conf
+* Manages:
+ * sssd
+ * oddjob
+ * For AD it can optionally manage **/etc/krb5.conf**
 
 ### Setup Requirements
 
-This module requires pluginsync enabled and eyp/nsswitch module installed
+This module requires pluginsync enabled and **eyp/nsswitch** module installed
 
 ### Beginning with sssd
 
@@ -73,7 +76,31 @@ sssd::ldap::sshkeys: false
 sssd::ldap::ldap_group_member: memberuid
 sssd::ldap::ldap_schema: rfc2307
 ```
+AD:
 
+```yaml
+---
+classes:
+  - sssd
+  - sssd::ad
+sssd::ad::ldap_user_name: 'sAMAccountName'
+sssd::ad::ldap_id_mapping: true
+sssd::ad::ad_domain: 'systemadmin.es'
+sssd::ad::ad_username: 'adminuser'
+sssd::ad::ad_password: 'secret'
+sssd::ad::krb5_realm: 'systemadmin.es'
+sssd::ad::kdc: 'SLDC01.systemadmin.es'
+sssd::ad::admin_server: 'SLDC01.systemadmin.es'
+sssd::ad::filter_users:
+  - 'root'
+  - 'ldap'
+  - 'named'
+  - 'avahi'
+  - 'haldaemon'
+  - 'dbus'
+  - 'news'
+  - 'nscd'
+```
 ## Usage
 
 * **sssd::ldap::ldap_uri**: read-only queries
@@ -96,9 +123,12 @@ sssd::ldap::ldap_schema: rfc2307
 * **sssd::ldap::ldap_network_timeout**: Specifies the timeout (in seconds) that ldap searches for user and group enumerations are allowed to run before they are cancelled and cached results are returned (default: 3)
 * **sssd::ldap::enumerate**: Determines if a domain can be enumerated (default: true)
 * **sssd::ldap::ldap_id_use_start_tls**: Specifies that the id_provider connection must also use tls to protect the channel. (default: false)
-* **sssd::ldap::ldap_access_filter**:
-  $ldap_access_filter = memberOf=cn=...
-  $ldap_access_filter = (|(memberOf=cn=...)(memberOf=cn=...)...)
+* **sssd::ldap::ldap_access_filter**: (default: undef)
+  examples:
+  ```yaml
+  sssd::ldap::ldap_access_filter: 'memberOf=cn=...'
+  sssd::ldap::ldap_access_filter: '(|(memberOf=cn=...)(memberOf=cn=...)...)'
+  ```
 
 ## Reference
 
@@ -106,29 +136,29 @@ sssd::ldap::ldap_schema: rfc2307
 
 #### sssd::ad
 
-* filter_users                   = [ 'root', 'ldap', 'named', 'avahi', 'haldaemon', 'dbus', 'news', 'nscd' ],
-* filter_groups                  = [ 'root' ],
-* ad_domain                      = 'example.com',
-* krb5_realm                     = 'EXAMPLE.COM',
-* kdc                            = 'kerberos.example.com',
-* admin_server                   = 'kerberos.example.com',
-* authconfigbackup               = '/var/tmp/puppet.authconfig.ad.backup',
-* ad_username                    = 'Administrator',
-* ad_password                    = 'Secret007!',
-* kerberos_ticket_lifetime       = '24h',
-* kerberos_renew_lifetime        = '7d',
-* kerberos_forwardable           = true,
-* kerberos_log_default           = '/var/log/krb5libs.log',
-* kerberos_log_kdc               = '/var/log/krb5kdc.log',
-* kerberos_log_admin_server      = '/var/log/kadmind.log',
-* ldap_id_mapping                = false,
-* default_shell                  = '/bin/bash',
-* enumerate                      = true,
-* cache_credentials              = true,
-* krb5_store_password_if_offline = true,
-* fallback_homedir               = '/home/%u',
-* ldap_user_name                 = undef,
-* ad_access_filter (default: undef)
+* **sssd::ad::filter_users**                   = [ 'root', 'ldap', 'named', 'avahi', 'haldaemon', 'dbus', 'news', 'nscd' ],
+* **sssd::ad::filter_groups**                  = [ 'root' ],
+* **sssd::ad::ad_domain**                      = 'example.com',
+* **sssd::ad::krb5_realm**                     = 'EXAMPLE.COM',
+* **sssd::ad::kdc**                            = 'kerberos.example.com',
+* **sssd::ad::admin_server**                   = 'kerberos.example.com',
+* **sssd::ad::authconfigbackup**               = '/var/tmp/puppet.authconfig.ad.backup',
+* **sssd::ad::ad_username**                    = 'Administrator',
+* **sssd::ad::ad_password**                    = 'Secret007!',
+* **sssd::ad::kerberos_ticket_lifetime**       = '24h',
+* **sssd::ad::kerberos_renew_lifetime**        = '7d',
+* **sssd::ad::kerberos_forwardable**           = true,
+* **sssd::ad::kerberos_log_default**           = '/var/log/krb5libs.log',
+* **sssd::ad::kerberos_log_kdc**               = '/var/log/krb5kdc.log',
+* **sssd::ad::kerberos_log_admin_server**      = '/var/log/kadmind.log',
+* **sssd::ad::ldap_id_mapping**                = false,
+* **sssd::ad::default_shell**                  = '/bin/bash',
+* **sssd::ad::enumerate**                      = true,
+* **sssd::ad::cache_credentials**              = true,
+* **sssd::ad::krb5_store_password_if_offline** = true,
+* **sssd::ad::fallback_homedir**               = '/home/%u',
+* **sssd::ad::ldap_user_name**                 = undef,
+* **sssd::ad::ad_access_filter** (default: undef)
   ```
       This option specifies LDAP access control filter that the user must match in order to be allowed access. Please note that the
       “access_provider” option must be explicitly set to “ad” in order for this option to have an effect.
@@ -279,4 +309,18 @@ sshPublicKey: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCsuZuQx/DDMFsGjXCdT/qMjqvRR2
 
 ## Limitations
 
-Tested in CentOS 6
+**sssd::ldap**: Tested on CentOS 6
+**sssd::ad**: tested on CentOS 6 and CentOS 7
+
+## Development
+
+We are pushing to have acceptance testing in place, so any new feature must
+have tests to check both presence and absence of any feature
+
+### Contributing
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Added some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
