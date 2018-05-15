@@ -1,3 +1,4 @@
+# private subclass, do not use
 class sssd::krb5(
                   $manage_package        = true,
                   $package_ensure        = 'installed',
@@ -8,8 +9,10 @@ class sssd::krb5(
                   $dns_lookup_realm      = true,
                   $dns_lookup_kdc        = true,
                   $realm                 = 'EXAMPLE.COM',
-                  $kdc                   = 'kerberos.example.com',
+                  $kdc                   = [ 'kerberos.example.com' ],
                   $admin_server          = 'kerberos.example.com',
+                  $master_kdc            = undef,
+                  $default_domain        = undef,
                   $ticket_lifetime       = '24h',
                   $renew_lifetime        = '7d',
                   $forwardable           = true,
