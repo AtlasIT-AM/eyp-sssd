@@ -10,6 +10,7 @@ class sssd::ad(
                 $authconfigbackup               = '/var/tmp/puppet.authconfig.ad.backup',
                 $ad_username                    = 'Administrator',
                 $ad_password                    = 'Secret007!',
+                $ad_computer_ou                 = undef,
                 $kerberos_ticket_lifetime       = '24h',
                 $kerberos_renew_lifetime        = '7d',
                 $kerberos_forwardable           = true,
@@ -89,11 +90,12 @@ class sssd::ad(
   }
 
   class { 'sssd::ad::join':
-    ad_username => $ad_username,
-    ad_password => $ad_password,
-    ad_domain   => $ad_domain,
-    require     => Class['sssd::krb5'],
-    notify      => Class['sssd::service'],
+    ad_username    => $ad_username,
+    ad_password    => $ad_password,
+    ad_domain      => $ad_domain,
+    ad_computer_ou => $ad_computer_ou,
+    require        => Class['sssd::krb5'],
+    notify         => Class['sssd::service'],
   }
 
 }
